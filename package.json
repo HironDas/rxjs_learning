@@ -23,5 +23,10 @@
   "homepage": "https://github.com/HironDas/rxjs_learning#readme",
   "dependencies": {
     "rx": "^4.1.0"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-browserify": "^0.5.1",
+    "gulp-util": "^3.0.7"
   }
 }
