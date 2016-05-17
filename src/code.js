@@ -1,3 +1,4 @@
+var loadJSONP = require('./map');
 var Rx = require('rx');
 
 var quakes = Rx.Observable.create(function(observer) {
@@ -11,7 +12,7 @@ var quakes = Rx.Observable.create(function(observer) {
 });
 
 
-quake.subscribe(function(quake) {
+quakes.subscribe(function(quake) {
 	var coords = quake.geometry.coordinates;
 	var size = quake.properties.mag * 10000;
 
