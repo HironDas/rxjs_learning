@@ -15,4 +15,5 @@ var loadJSONP = function (url) {
 var map = L.map('map').setView([33.858631, -118.279602], 7);
 L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(map);
 
-module.exports = loadJSONP;
+module.exports.loadJSONP = loadJSONP;
+module.exports.QUAKE_URL = loadJSONP;

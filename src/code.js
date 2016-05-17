@@ -1,4 +1,4 @@
-var loadJSONP = require('./map');
+var map = require('./map');
 var Rx = require('rx');
 
 var quakes = Rx.Observable.create(function(observer) {
@@ -8,7 +8,7 @@ var quakes = Rx.Observable.create(function(observer) {
 		});
 	};
 
-	loadJSONP(QUAKE_URL);
+	map.loadJSONP(map.QUAKE_URL);
 });
 
 
