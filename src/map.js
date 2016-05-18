@@ -4,10 +4,11 @@ var QUAKE_URL = 'http://earthquake.usgs.gov/earthquakes/feed/v1.0/' +
 'summary/all_day.geojsonp';
 
 var loadJSONP = function (url) {
+	
 	var script = document.createElement('script');
 	script.src = url;
 
-	var head = document.getElementByTagName('head')[0];
+	var head = document.getElementsByTagName('head')[0];
 
 	head.appendChild(script);
 }
