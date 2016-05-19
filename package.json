@@ -22,7 +22,6 @@
   },
   "homepage": "https://github.com/HironDas/rxjs_learning#readme",
   "dependencies": {
-    "jquery": "^2.2.3",
     "leaflet": "^0.7.3",
     "rx": "^4.1.0",
     "rx-dom": "^7.0.3"

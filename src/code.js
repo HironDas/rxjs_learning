@@ -2,6 +2,7 @@ var map = require('./map');
 var Rx = require('rx');
 var DOM = require('rx-dom');
 
+
 var quakes = Rx.Observable.interval(5000)
 	.flatMap(function(){
 		return Rx.DOM.jsonpRequest({
