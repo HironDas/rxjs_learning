@@ -1,6 +1,6 @@
 var Rx = require('rx');
 
-var times = [
+/*var times = [
     { value: 0, time: 100 },
     { value: 1, time: 600 },
     { value: 2, time: 400 },
@@ -27,6 +27,7 @@ var subscription = source.subscribe(
   function () {
     console.log('Completed');
   });
+*/
 
 /*
 
@@ -80,3 +81,11 @@ var source = Rx.Observable.interval(1000)
     source.subscribe(function(d){
       console.log(d) 
     });*/
+
+/*var array = [1,3,4,2,3,1,34];
+
+Rx.Observable.from(array)
+	.delay(function(d) => Rx.Observable.timer(d*1000);})
+	.subscribe(function(d){
+		console.log(d);
+	})*/
