@@ -91,10 +91,11 @@ var StarStream = Rx.Observable.range(1, STAR_NUMBER)
 	var ENEMY_FREQ = 1500;
 	var Enemies = Rx.Observable.interval(ENEMY_FREQ)
 				.scan(function(enemyArray){
-					enemyArray.push({
+					 enemyArray.push({
 						x: parseInt(Math.random()*canvas.width),
 						y: -30
 					})
+					return enemyArray;
 				},[]);
 
 var Game = Rx.Observable
@@ -106,7 +107,7 @@ var Game = Rx.Observable
 				spaceship: spaceship, 
 				enemies: enemies
 			};
-		});
+		}).sample(SPEED);
 
 Game.subscribe(function(actors){
 	paintStars(actors.stars);
