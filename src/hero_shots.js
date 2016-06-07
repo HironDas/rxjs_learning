@@ -1,3 +1,5 @@
+var Rx = require('rx');
+
 var playerFiring = Rx.Observable
 	.merge(
 	Rx.Observable.fromEvent(canvas, 'click'),
