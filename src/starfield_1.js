@@ -51,6 +51,24 @@ var StarStream = Rx.Observable.range(1, STAR_NUMBER)
 		ctx.lineTo(x - width, y);
 		ctx.fill();
 	}
+/*---Hero Firing functions---*/
+var playerFiring = Rx.Observable
+	.merge(
+		Rx.Observable.fromEvent(canvas, 'click'),
+		Rx.Observable.fromEvent(canvas, 'keydown')
+		.filter(function(evt){ return evt.keycode === 32; })
+	).sample(200)
+	.timestamp();
+
+var HeroShots = Rx.Observable.combineLatest(
+	playerFiring,
+	SpaceShip,
+	function(shotEvents, spaceShip){
+		return {x: spaceShip.x};
+	})
+	.scan(function(shorArray, shot){
+		shotArray.push({x: shot.x, y: HERO_Y});
+	},[]);
 
 	//Helper function to get a random integer
 	function getRandomInt(min, max){
@@ -72,6 +90,17 @@ var StarStream = Rx.Observable.range(1, STAR_NUMBER)
 			drawTriangle(enemy.x, enemy.y, 20, "#00ff00", "down");
 		});
 	}
+
+
+//helper function to draw every short in the array of shots 
+var	SHOOTING_SPEED = 15;
+
+function paintHeroShots(heroShots) {
+	heroShots.forEach(function(shot) {
+		shot.y -= SHOOTING_SPEED;
+		drawTrinagle(shot.x, shor.y, 5, '#ffff00', 'up');
+	});
+}
 
 	/*---hero Spaceship---*/
 	var HERO_Y = canvas.height - 30;
@@ -100,12 +129,13 @@ var StarStream = Rx.Observable.range(1, STAR_NUMBER)
 
 var Game = Rx.Observable
 	.combineLatest(
-		StarStream, SpaceShip, Enemies,
-		function(stars, spaceship, enemies) {
+		StarStream, SpaceShip, Enemies, HeroShots,
+		function(stars, spaceship, enemies, heroShots) {
 			return {
 				stars: stars, 
 				spaceship: spaceship, 
-				enemies: enemies
+				enemies: enemies,
+				heroShots: heroShots
 			};
 		}).sample(SPEED);
 
@@ -113,4 +143,5 @@ Game.subscribe(function(actors){
 	paintStars(actors.stars);
 	paintSpaceShip(actors.spaceship.x, actors.spaceship.y);
 	paintEnemies(actors.enemies);
+	paintHeroShots(actors.heroShots);
 });

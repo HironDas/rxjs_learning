@@ -17,3 +17,13 @@ var HeroShots = Rx.Observable.combineLatest(
 	.scan(function(shorArray, shot){
 		shotArray.push({x: shot.x, y: HERO_Y});
 	},[]);
+
+//helper function to draw every short in the array of shots 
+var	SHOOTING_SPEED = 15;
+
+function paintHeroShots(heroShots) {
+	heroShots.forEach(function(shot) {
+		shot.y -= SHOOTING_SPEED;
+		drawTrinagle(shot.x, shor.y, 5, '#ffff00', 'up');
+	});
+}
