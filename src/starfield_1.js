@@ -64,7 +64,7 @@ function paintHeroShots(heroShots) {
 
 	heroShots.forEach(function(shot) {
 		shot.y -= SHOOTING_SPEED;
-		drawTrinagle(shot.x, shor.y, 5, '#ffff00', 'up');
+		drawTriangle(shot.x, shot.y, 5, '#ffff00', 'up');
 	});
 }
 
@@ -132,7 +132,7 @@ var HeroShots = Rx.Observable.combineLatest(
 	.distinctUntilChanged( function(shot) { return shot.timestamp; })
 	.scan(function(shotArray, shot){
 		shotArray.push({x: shot.x, y: HERO_Y});
-		return shotArray.filter(isVisible);
+		return shotArray;
 	},[]);
 
 	
