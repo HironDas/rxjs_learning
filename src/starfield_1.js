@@ -60,6 +60,8 @@ var HERO_Y = canvas.height - 30;
 //helper function to draw every short in the array of shots 
 
 function paintHeroShots(heroShots) {
+		console.log(heroShots);
+
 	heroShots.forEach(function(shot) {
 		shot.y -= SHOOTING_SPEED;
 		drawTrinagle(shot.x, shor.y, 5, '#ffff00', 'up');
@@ -68,6 +70,15 @@ function paintHeroShots(heroShots) {
 
 
 
+/*----------*****--------------
+	Reactive Code
+------------*****--------------*/
+var playerShots = Rx.Observable
+	.merge(
+		Rx.Observable.fromEvent(canvas, 'click'),
+		Rx.Observable.fromEvent(document, 'keydown')
+		.filter(function(evt){ return evt.keyCode === 32; })
+	);
 
 var StarStream = Rx.Observable.range(1, STAR_NUMBER)
 	.map(function(){
@@ -80,41 +91,16 @@ var StarStream = Rx.Observable.range(1, STAR_NUMBER)
 	.toArray()
 	.flatMap(function(starArray) {
 		return Rx.Observable.interval(SPEED).map(function() {
-			starArray.forEach(function(star) {
+			return starArray.map(function(star) {
 				if(star.y >= canvas.height) {
 					star.y = 0;
 				}
 				star.y += 3;
+				return star;
 			});
-			return starArray;
 		});
 	});
 
-	
-/*---Hero Firing functions---*/
-var playerFiring = Rx.Observable
-	.merge(
-		Rx.Observable.fromEvent(canvas, 'click'),
-		Rx.Observable.fromEvent(canvas, 'keydown')
-		.filter(function(evt){ return evt.keycode === 32; })
-	).sample(200)
-	.timestamp();
-
-var HeroShots = Rx.Observable.combineLatest(
-	playerFiring,
-	SpaceShip,
-	function(shotEvents, spaceShip){
-		return {
-			timestamp: shotEvents.timestamp,
-			x: spaceShip.x
-		};
-	})
-	.distinctUntilChanged( function(shot) { return shot.timestamp; })
-	.scan(function(shorArray, shot){
-		shotArray.push({x: shot.x, y: HERO_Y});
-	},[]);
-
-	
 	/*---hero Spaceship---*/
 	var mouseMove = Rx.Observable.fromEvent(canvas, 'mousemove');
 
@@ -127,6 +113,30 @@ var HeroShots = Rx.Observable.combineLatest(
 		x: canvas.width / 2,
 		y: HERO_Y
 	});
+	
+/*---Hero Firing functions---*/
+playerFiring= playerShots
+	.startWith({})
+	.sample(200)
+	.timestamp();
+
+var HeroShots = Rx.Observable.combineLatest(
+	playerFiring, SpaceShip,
+	function(shotEvents, spaceShip){
+		// console.log(shotEvents);
+		return {
+			timestamp: shotEvents.timestamp,
+			x: spaceShip.x
+		};
+	})
+	.distinctUntilChanged( function(shot) { return shot.timestamp; })
+	.scan(function(shotArray, shot){
+		shotArray.push({x: shot.x, y: HERO_Y});
+		return shotArray.filter(isVisible);
+	},[]);
+
+	
+
 
 	/*---enemy Spaceship---*/
 	var Enemies = Rx.Observable.interval(ENEMY_FREQ)
@@ -142,6 +152,7 @@ var Game = Rx.Observable
 	.combineLatest(
 		StarStream, SpaceShip, Enemies, HeroShots,
 		function(stars, spaceship, enemies, heroShots) {
+
 			return {
 				stars: stars, 
 				spaceship: spaceship, 
