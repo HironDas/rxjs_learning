@@ -185,12 +185,18 @@ var Enemies = Rx.Observable.interval(ENEMY_FREQ)
 
 		Rx.Observable.interval(ENEMY_SHOOTING_FREQ)
 			.subscribe(function(){
-				enemy.shots.push({x: enemy.x, y: enemy.y });
+
+				if(!enemy.isDead) {
+					enemy.shots.push({x: enemy.x, y: enemy.y });
+				}
 				enemy.shots = enemy.shots.filter(isVisible);
 			});
 
 		enemyArray.push(enemy);
-		return enemyArray.filter(isVisible);
+		return enemyArray.filter(isVisible)
+				.filter(function(enemy) {
+					return !(enemy.isDead && enemy.shots.length === 0);
+				});
 	}, []);
 
 var Game = Rx.Observable
