@@ -12,6 +12,7 @@ canvas.height = window.innerHeight;
 var SPEED = 40;
 var STAR_NUMBER = 250;
 var ENEMY_FREQ = 1500;
+var ENEMY_SHOOTING_FREQ = 750;
 var	SHOOTING_SPEED = 15;
 var HERO_Y = canvas.height - 30;
 
@@ -20,6 +21,16 @@ var HERO_Y = canvas.height - 30;
 //Helper function to get a random integer
 	function getRandomInt(min, max){
 		return Math.floor(Math.random()*(max - min + 1)) + min;
+	}
+
+	function isVisible(obj) {
+		return obj.x > -40 && obj.x < canvas.width + 40 &&
+				obj.y > -40 && obj.y < canvas.height + 40;
+	}
+
+	function collision(target1, target2){
+		return (target1.x > target2.x - 20 && target1.x < target2.x + 20) &&
+			(target1.y > target2.y - 20 && target1.y < target2.y + 20);
 	}
 
 	function drawTriangle(x, y, width, color, direction) {
@@ -52,17 +63,33 @@ var HERO_Y = canvas.height - 30;
 			enemy.y += 5;
 			enemy.x += getRandomInt(-15, 15);
 
-			drawTriangle(enemy.x, enemy.y, 20, "#00ff00", "down");
+			if(!enemy.isDead){
+				drawTriangle(enemy.x, enemy.y, 20, "#00ff00", "down");
+			}
+
+			enemy.shots.forEach(function(shot){
+				shot.y += SHOOTING_SPEED;
+				drawTriangle(shot.x, shot.y, 5, "#00ffff", 'down');
+			});
+			
 		});
 	}
 
 
 //helper function to draw every short in the array of shots 
 
-function paintHeroShots(heroShots) {
-		console.log(heroShots);
+function paintHeroShots(heroShots, enemies) {
+		// console.log(heroShots);
 
 	heroShots.forEach(function(shot) {
+		for ( var l = 0; l < enemies.length; l++){
+			var  enemy = enemies[l];
+			if(!enemy.isDead && collision(shot, enemy)) {
+				enemy.isDead = true;
+				shot.x = shot.y = -100;
+				break;
+			}
+		}
 		shot.y -= SHOOTING_SPEED;
 		drawTriangle(shot.x, shot.y, 5, '#ffff00', 'up');
 	});
@@ -139,7 +166,7 @@ var HeroShots = Rx.Observable.combineLatest(
 
 
 	/*---enemy Spaceship---*/
-	var Enemies = Rx.Observable.interval(ENEMY_FREQ)
+	/*var Enemies = Rx.Observable.interval(ENEMY_FREQ)
 				.scan(function(enemyArray){
 					 enemyArray.push({
 						x: parseInt(Math.random()*canvas.width),
@@ -147,6 +174,24 @@ var HeroShots = Rx.Observable.combineLatest(
 					})
 					return enemyArray;
 				},[]);
+*/
+var Enemies = Rx.Observable.interval(ENEMY_FREQ)
+	.scan(function(enemyArray) {
+		var enemy = {
+			x: parseInt(Math.random() * canvas.width),
+			y: -30,
+			shots: []
+		};
+
+		Rx.Observable.interval(ENEMY_SHOOTING_FREQ)
+			.subscribe(function(){
+				enemy.shots.push({x: enemy.x, y: enemy.y });
+				enemy.shots = enemy.shots.filter(isVisible);
+			});
+
+		enemyArray.push(enemy);
+		return enemyArray.filter(isVisible);
+	}, []);
 
 var Game = Rx.Observable
 	.combineLatest(
@@ -165,5 +210,5 @@ Game.subscribe(function(actors){
 	paintStars(actors.stars);
 	paintSpaceShip(actors.spaceship.x, actors.spaceship.y);
 	paintEnemies(actors.enemies);
-	paintHeroShots(actors.heroShots);
+	paintHeroShots(actors.heroShots, actors.enemies);
 });

@@ -5,7 +5,12 @@ function isVisible(obj) {
 			obj.y > -40 && obj.y < canvas.height + 40;
 }
 
-var ENEMY_FREQ = 15000;
+function collision(target1, target2){
+	return (target1.x > target2.x - 20 && target1.x < target2.x + 20) &&
+		(target1.y > target2.y - 20 && target1.y < target2.y + 20);
+}
+
+var ENEMY_FREQ = 1500;
 var ENEMY_SHOOTING_FREQ = 750;
 var Enemies = Rx.Observable.interval(ENEMY_FREQ)
 	.scan(function(enemyArray) {
@@ -24,4 +29,3 @@ var Enemies = Rx.Observable.interval(ENEMY_FREQ)
 		enemyArray.push(enemy);
 		return enemyArray.filter(isVisible);
 	}, []);
-	
