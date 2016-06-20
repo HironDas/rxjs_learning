@@ -15,6 +15,7 @@ var ENEMY_FREQ = 1500;
 var ENEMY_SHOOTING_FREQ = 750;
 var	SHOOTING_SPEED = 15;
 var HERO_Y = canvas.height - 30;
+var SCORE_INCREASE = 10;
 
 
 /*--helpar function--*/
@@ -85,6 +86,7 @@ function paintHeroShots(heroShots, enemies) {
 		for ( var l = 0; l < enemies.length; l++){
 			var  enemy = enemies[l];
 			if(!enemy.isDead && collision(shot, enemy)) {
+				ScoreSubject.onNext(SCORE_INCREASE);
 				enemy.isDead = true;
 				shot.x = shot.y = -100;
 				break;
@@ -108,11 +110,22 @@ function gameOver(ship, enemies) {
 	})
 }
 
+function paintScore(score) {
+	ctx.fillStyle = "#ffffff";
+	ctx.font = "bold 26px sans-serif";
+	ctx.fillText('Score: ' + score, 40, 43);
+}
 
 
 /*----------*****--------------
 	Reactive Code
 ------------*****--------------*/
+
+var ScoreSubject = new Rx.Subject();
+var score = ScoreSubject.scan(function(pre, cur) {
+	return pre + cur;
+}, 0).startWith(0);
+
 var playerShots = Rx.Observable
 	.merge(
 		Rx.Observable.fromEvent(canvas, 'click'),
@@ -214,14 +227,15 @@ var Enemies = Rx.Observable.interval(ENEMY_FREQ)
 
 var Game = Rx.Observable
 	.combineLatest(
-		StarStream, SpaceShip, Enemies, HeroShots,
-		function(stars, spaceship, enemies, heroShots) {
+		StarStream, SpaceShip, Enemies, HeroShots, score,
+		function(stars, spaceship, enemies, heroShots, score) {
 
 			return {
 				stars: stars, 
 				spaceship: spaceship, 
 				enemies: enemies,
-				heroShots: heroShots
+				heroShots: heroShots,
+				score: score
 			};
 		}).sample(SPEED)
 	.takeWhile(function(actors){
@@ -233,4 +247,5 @@ Game.subscribe(function(actors){
 	paintSpaceShip(actors.spaceship.x, actors.spaceship.y);
 	paintEnemies(actors.enemies);
 	paintHeroShots(actors.heroShots, actors.enemies);
+	paintScore(actors.score);
 });
