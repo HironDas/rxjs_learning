@@ -95,6 +95,19 @@ function paintHeroShots(heroShots, enemies) {
 	});
 }
 
+function gameOver(ship, enemies) {
+	return enemies.some(function(enemy){
+		
+		if(collision(ship, enemy)){
+			return true;
+		}
+
+		return enemy.shots.some(function(shot) {
+			return collision(ship, shot);
+		})
+	})
+}
+
 
 
 /*----------*****--------------
