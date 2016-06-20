@@ -97,7 +97,7 @@ function paintHeroShots(heroShots, enemies) {
 
 function gameOver(ship, enemies) {
 	return enemies.some(function(enemy){
-		
+
 		if(collision(ship, enemy)){
 			return true;
 		}
@@ -223,7 +223,10 @@ var Game = Rx.Observable
 				enemies: enemies,
 				heroShots: heroShots
 			};
-		}).sample(SPEED);
+		}).sample(SPEED)
+	.takeWhile(function(actors){
+		return gameOver(actors.spaceship, actors.enemies) === false;
+	});
 
 Game.subscribe(function(actors){
 	paintStars(actors.stars);
