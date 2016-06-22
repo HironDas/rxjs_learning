@@ -47,9 +47,9 @@ var SCORE_INCREASE = 10;
 	function paintStars(stars) {
 		ctx.fillStyle = '#000000';
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
-		ctx.fillStyle = '#ffffff';
 		stars.forEach(function(star) {
 			ctx.fillRect(star.x, star.y, star.size, star.size);
+			ctx.fillStyle = star.color;
 		});
 	}
 
@@ -59,7 +59,7 @@ var SCORE_INCREASE = 10;
 	}
 
 	function paintEnemies(enemies) {
-		console.log(enemies);
+		// console.log(enemies);
 		enemies.forEach(function(enemy) {
 			enemy.y += 5;
 			enemy.x += getRandomInt(-15, 15);
@@ -138,7 +138,8 @@ var StarStream = Rx.Observable.range(1, STAR_NUMBER)
 		return {
 			x: parseInt(Math.random() * canvas.width),
 			y: parseInt(Math.random() * canvas.height),
-			size: Math.random() * 3 +1
+			size: Math.random() * 3 +1,
+			color: "#ffffff"
 		};
 	})
 	.toArray()
@@ -153,6 +154,33 @@ var StarStream = Rx.Observable.range(1, STAR_NUMBER)
 			});
 		});
 	});
+
+var StarStreamFaraway = Rx.Observable.range(1, STAR_NUMBER)
+	.map(function(){
+		return {
+			x: parseInt(Math.random() * canvas.width),
+			y: parseInt(Math.random() * canvas.height),
+			size: Math.random() * 3 +1,
+			color: "#ffffff"
+		};
+	})
+	.toArray()
+	.flatMap(function(starArray) {
+		return Rx.Observable.interval(60).map(function() {
+			return starArray.map(function(star) {
+				if(star.y >= canvas.height) {
+					star.y = 0;
+				}
+				star.y += 3;
+				return star;
+			});
+		});
+	});
+
+var newStar = Rx.Observable.combineLatest(StarStream, StarStreamFaraway, 
+	function(stars, starsFaraway){
+		return starsFaraway.concat(stars);
+});
 
 	/*---hero Spaceship---*/
 	var mouseMove = Rx.Observable.fromEvent(canvas, 'mousemove');
@@ -227,11 +255,11 @@ var Enemies = Rx.Observable.interval(ENEMY_FREQ)
 
 var Game = Rx.Observable
 	.combineLatest(
-		StarStream, SpaceShip, Enemies, HeroShots, score,
+		newStar,  SpaceShip, Enemies, HeroShots, score,
 		function(stars, spaceship, enemies, heroShots, score) {
 
 			return {
-				stars: stars, 
+				stars: stars,
 				spaceship: spaceship, 
 				enemies: enemies,
 				heroShots: heroShots,
@@ -243,6 +271,7 @@ var Game = Rx.Observable
 	});
 
 Game.subscribe(function(actors){
+	console.log(actors.stars);
 	paintStars(actors.stars);
 	paintSpaceShip(actors.spaceship.x, actors.spaceship.y);
 	paintEnemies(actors.enemies);
