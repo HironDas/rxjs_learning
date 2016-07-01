@@ -3,7 +3,8 @@ var Rx = require('rx');
 var DOM = require('rx-dom');
 
 
-var quakes = Rx.Observable.interval(5000)
+function initialize() {
+	var quakes = Rx.Observable.interval(5000)
 	.flatMap(function(){
 		return Rx.DOM.jsonpRequest({
 		url: map.QUAKE_URL,
@@ -25,11 +26,14 @@ var quakes = Rx.Observable.interval(5000)
 	});*/
 
 
-quakes.subscribe(function(quake) {
-	console.log(quake);
+	quakes.subscribe(function(quake) {
+		console.log(quake);
 
-	var coords = quake.geometry.coordinates;
-	var	size = quake.properties.mag * 10000;
+		var coords = quake.geometry.coordinates;
+		var	size = quake.properties.mag * 10000;
 
-	L.circle([coords[1], coords[0]], size).addTo(map.map);
-});
+		L.circle([coords[1], coords[0]], size).addTo(map.map);
+	});
+}
+
+Rx.DOM.ready().subscribe(initialize);
