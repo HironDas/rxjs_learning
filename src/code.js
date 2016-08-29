@@ -26,7 +26,7 @@ function initialize() {
 			size: quake.properties.mag * 10000
 		};
 	});*/
-	quake.pluck('properties')
+	quakes.pluck('properties')
 		.map(makeRow)
 		.subscribe(function(row) {
 			table.appendChild(row);
@@ -50,6 +50,7 @@ function makeRow(props) {
 
 	var date = new Date(props.time);
 	var time = date.toString();
+	
 	[props.place, props.mag, time].forEach(function(text) {
 		var cell = document.createElement('td');
 		cell.textContent = text;
