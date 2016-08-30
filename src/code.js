@@ -14,12 +14,13 @@ function initialize() {
 		}).retry(3);
 	})
 	.flatMap(function transform(dataset){
+		console.log(dataset);
 		return Rx.Observable.from(dataset.response.features);
 	})
 	.distinct(function(quake){
 		return quake.properties.code;
 
-	});/*.map(function(quake){
+	}).share();/*.map(function(quake){
 		return {
 			lat: quake.geometry.coordinates[1],
 			lng: quake.geometry.coordinates[2],
@@ -28,13 +29,24 @@ function initialize() {
 	});*/
 	quakes.pluck('properties')
 		.map(makeRow)
-		.subscribe(function(row) {
-			table.appendChild(row);
+		.bufferWithTime(500)
+		.filter(function(rows){ return rows.length > 0;})
+		.map(function(rows){
+			var fragment = document.createDocumentFragment();
+
+			rows.forEach(function(row){
+				fragment.appendChild(row);
+			});
+
+			return fragment;
+		})
+		.subscribe(function(fragment) {
+			table.appendChild(fragment);
 		});
 
 
 	quakes.subscribe(function(quake) {
-		console.log(quake);
+		// console.log(quake);
 
 		var coords = quake.geometry.coordinates;
 		var	size = quake.properties.mag * 10000;
@@ -50,7 +62,7 @@ function makeRow(props) {
 
 	var date = new Date(props.time);
 	var time = date.toString();
-	
+
 	[props.place, props.mag, time].forEach(function(text) {
 		var cell = document.createElement('td');
 		cell.textContent = text;
