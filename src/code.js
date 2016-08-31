@@ -4,6 +4,9 @@ var DOM = require('rx-dom');
 
 //all divs
 var table = document.getElementById('quakes_info');
+var codeLayers = {};
+var quakeLayer = L.layerGroup([]).addTo(map);
+var identity = Rx.helper.identity;
 
 function initialize() {
 	var quakes = Rx.Observable.interval(5000)
@@ -41,6 +44,13 @@ function initialize() {
 			return fragment;
 		})
 		.subscribe(function(fragment) {
+			var row = fragment.firstChild;
+			var circle = quakeLayer.getLayer(codeLayers[row.id]);
+
+			isHovering(row).subscribe(function(hovering){
+				map.panTo(circle.getLatLng());
+			});
+
 			table.appendChild(fragment);
 		});
 
@@ -51,7 +61,10 @@ function initialize() {
 		var coords = quake.geometry.coordinates;
 		var	size = quake.properties.mag * 10000;
 
-		L.circle([coords[1], coords[0]], size).addTo(map.map);
+		var circle = L.circle([coords[1], coords[0]], size).addTo(map.map);
+		console.log(quakeLayer);
+		quakeLayer.addLayer(circle);
+		codeLayers[quake.id] = quakeLayer.getLayerId(circle);
 	});
 }
 
@@ -70,6 +83,13 @@ function makeRow(props) {
 	});
 
 	return row;
+}
+
+function isHovering(element) {
+	var over = Rx.DOM.mouseover(element).map(identity(true));
+	var out = Rx.DOM.mouseout(element).map(identity(false));
+
+	return over.merge(out);
 }
 
 Rx.DOM.ready().subscribe(initialize);
