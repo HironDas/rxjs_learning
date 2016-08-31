@@ -48,8 +48,12 @@ function initialize() {
 			var circle = quakeLayer.getLayer(codeLayers[row.id]);
 
 			isHovering(row).subscribe(function(hovering){
-				map.panTo(circle.getLatLng());
+				circle.setStyle({color: hovering ? '#ff0000' : '#0000ff'});
 			});
+
+			Rx.DOM.click(row).subscribe(function(){
+				map.panTo(circle.getLatLng());
+			})
 
 			table.appendChild(fragment);
 		});
