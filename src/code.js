@@ -65,8 +65,7 @@ function initialize() {
 		var coords = quake.geometry.coordinates;
 		var	size = quake.properties.mag * 10000;
 
-		var circle = L.circle([coords[1], coords[0]], size).addTo(map.map);
-		console.log(quakeLayer);
+		var circle = L.circle([coords[1], coords[0]], size).addTo(map);
 		quakeLayer.addLayer(circle);
 		codeLayers[quake.id] = quakeLayer.getLayerId(circle);
 	});
@@ -94,6 +93,17 @@ function isHovering(element) {
 	var out = Rx.DOM.mouseout(element).map(identity(false));
 
 	return over.merge(out);
+}
+
+function getRowFromEvent(event){
+	return Rx.Observable
+		.fromEvent(table, event)
+		.filter(function(event) {
+			vat el = event.target;
+			return el.tagName == "TD" && el.parentNode.id.length;
+		})
+		.pluck('target', 'parentNode')
+		.distinctUntilChanged();
 }
 
 Rx.DOM.ready().subscribe(initialize);
