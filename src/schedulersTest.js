@@ -34,3 +34,8 @@ Rx.Observable.range(1, 5)
 	});
 
 console.log('after subscription');
+
+Rx.Observable.return(10, Rx.Scheduler.currentThread)
+	.repeat()
+	.take(2)
+	.subscribe((d)=> console.log(d));
