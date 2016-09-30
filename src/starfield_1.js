@@ -306,7 +306,7 @@ var StarStream = Rx.Observable.range(1, STAR_NUMBER)
 	})
 	.toArray()
 	.flatMap(function(starArray) {
-		return Rx.Observable.interval(SPEED).map(function() {
+		return animationLoop().map(function() {
 			return starArray.map(function(star) {
 				if(star.y >= canvas.height) {
 					star.y = 0;
@@ -440,3 +440,14 @@ Game.subscribe(function(actors){
 	paintHeroShots(actors.heroShots, actors.enemies);
 	paintScore(actors.score);
 });
+
+
+/*--helper functions*/
+function animationLoop(scheduler) {
+	return Rx.Observable.generate(
+		0,
+		function(){ return true; },
+		function(x){return x+1; },
+		function(x){ return x; },
+		Rx.Scheduler.requestAnimationFrame);
+}
